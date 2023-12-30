@@ -10,12 +10,12 @@ import (
 	"path/filepath"
 )
 
-type VideoParam struct {
+type HlsParam struct {
 	url      string
 	diskPath string
 }
 
-func CrawlVideo(param VideoParam) {
+func CrawlHls(param HlsParam) {
 	resp, err := http.Get(param.url)
 	if err != nil {
 		panic(err)
