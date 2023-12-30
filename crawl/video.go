@@ -1,6 +1,8 @@
 package crawl
 
 import (
+	"encoding/json"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/grafov/m3u8"
 	"io"
 	"log"
@@ -10,12 +12,58 @@ import (
 	"path/filepath"
 )
 
-type HlsParam struct {
+type CrawlVideoParam struct {
+	webUrl   string
+	diskPath string
+}
+
+func CrawlVideo(param CrawlVideoParam) {
+	var m3u8Url string
+	GetM3u8Url(param.webUrl, &m3u8Url)
+	SaveHls(HlsSaveParam{
+		url:      m3u8Url,
+		diskPath: param.diskPath,
+	})
+}
+
+type VideoElement struct {
+	Url        string `json:"url"`
+	Pic        string `json:"pic"`
+	Type       string `json:"type"`
+	Thumbnails string `json:"thumbnails"`
+}
+
+type DataConfig struct {
+	Video VideoElement `json:"video"`
+}
+
+func GetM3u8Url(webUrl string, m3u8Url *string) {
+	doc, err := goquery.NewDocument(webUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	doc.Find(".dplayer").Each(func(i int, s *goquery.Selection) {
+		// 获取 "myattribute" 属性的值
+		value, exists := s.Attr("data-config")
+		if exists {
+			log.Println(value)
+			var dataConfig DataConfig
+			err := json.Unmarshal([]byte(value), &dataConfig)
+			if err != nil {
+				log.Fatal(err)
+			}
+			*m3u8Url = dataConfig.Video.Url
+		}
+	})
+}
+
+type HlsSaveParam struct {
 	url      string
 	diskPath string
 }
 
-func CrawlHls(param HlsParam) {
+func SaveHls(param HlsSaveParam) {
 	resp, err := http.Get(param.url)
 	if err != nil {
 		panic(err)
