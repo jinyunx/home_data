@@ -11,7 +11,7 @@ import (
 
 type ScreenshotParam struct {
 	name     string
-	url      string
+	webUrl   string
 	diskPath string
 	timeout  time.Duration
 }
@@ -34,7 +34,7 @@ func DoScreenshot(param ScreenshotParam) {
 
 	// capture entire browser viewport, returning png with quality=90
 	if err := chromedp.Run(ctx,
-		getTasks(param.url, &buf, &dataConfig)); err != nil {
+		getTasks(param.webUrl, &buf, &dataConfig)); err != nil {
 		log.Fatal(err)
 	}
 

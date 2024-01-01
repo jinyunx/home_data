@@ -12,7 +12,7 @@ func TestScreenshot(t *testing.T) {
 	os.MkdirAll(diskPath, 0755)
 	DoScreenshot(ScreenshotParam{
 		name:     "103942",
-		url:      "",
+		webUrl:   "",
 		diskPath: diskPath,
 		timeout:  5 * time.Minute,
 	})
