@@ -10,10 +10,13 @@ import (
 func TestScreenshot(t *testing.T) {
 	diskPath := "../data/103942/"
 	os.MkdirAll(diskPath, 0755)
-	DoScreenshot(ScreenshotParam{
+	s := Screenshot{
 		name:     "103942",
 		webUrl:   "",
 		diskPath: diskPath,
 		timeout:  5 * time.Minute,
-	})
+	}
+	if err := s.DoScreenshot(); err != nil {
+		t.Fatal(err)
+	}
 }

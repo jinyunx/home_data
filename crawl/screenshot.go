@@ -9,14 +9,14 @@ import (
 	"time"
 )
 
-type ScreenshotParam struct {
+type Screenshot struct {
 	name     string
 	webUrl   string
 	diskPath string
 	timeout  time.Duration
 }
 
-func DoScreenshot(param ScreenshotParam) {
+func (s *Screenshot) DoScreenshot() error {
 	// create context
 	ctx, cancel := chromedp.NewContext(
 		context.Background(),
@@ -25,7 +25,7 @@ func DoScreenshot(param ScreenshotParam) {
 	defer cancel()
 
 	// 设置超时
-	ctx, cancel = context.WithTimeout(ctx, param.timeout)
+	ctx, cancel = context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
 	// capture screenshot of an element
@@ -34,16 +34,19 @@ func DoScreenshot(param ScreenshotParam) {
 
 	// capture entire browser viewport, returning png with quality=90
 	if err := chromedp.Run(ctx,
-		getTasks(param.webUrl, &buf, &dataConfig)); err != nil {
-		log.Fatal(err)
+		getTasks(s.webUrl, &buf, &dataConfig)); err != nil {
+		log.Println("chromedp.Run fail", err)
+		return err
 	}
 
-	imgPath := param.diskPath + param.name + ".png"
+	imgPath := s.diskPath + s.name + ".png"
 	if err := os.WriteFile(imgPath, buf, 0o644); err != nil {
-		log.Fatal(err)
+		log.Println("os.WriteFile fail", err, imgPath)
+		return err
 	}
 	log.Println("img path:", imgPath)
 	log.Println("data-config:", dataConfig)
+	return nil
 }
 
 // fullScreenshot takes a screenshot of the entire browser viewport.

@@ -3,66 +3,107 @@ package crawl
 import (
 	"github.com/jinyunx/home_data/taskqueue"
 	"github.com/jinzhu/gorm"
+	"log"
 	"net/url"
+	"os"
 	"path/filepath"
 	"sync"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
-type CrawlParam struct {
-	webUrl   string
-	dataDisk string
+type FetchParam struct {
+	WebUrl   string
+	DiskPath string
 }
 
-type CrawlInfo struct {
+type SqliteInfo struct {
 	gorm.Model
-	Name    string `gorm:"uniqueIndex"`
-	Status  int32
-	Html    string
-	M3u8Url string
+	Name            string `gorm:"uniqueIndex"`
+	Status          int32
+	WebUrl          string
+	M3u8Url         string
+	ScreenshotError string
+	VideoSaverError string
 }
 
-type CrawlTask struct {
+type FetchTask struct {
 	Task *taskqueue.TaskQueue
+	db   *gorm.DB
 }
 
-func NewCrawlTask() *CrawlTask {
-	return &CrawlTask{
-		Task: taskqueue.NewTaskQueue(),
-	}
-}
-
-func (c *CrawlTask) AddCrawlTask(param CrawlParam) {
-	u, err := url.Parse(param.webUrl)
+func NewCrawlTask() *FetchTask {
+	db, err := gorm.Open("sqlite3", "./data/test.db")
 	if err != nil {
 		panic(err)
 	}
 
+	// Migrate the schema
+	db.AutoMigrate(&SqliteInfo{})
+
+	return &FetchTask{
+		Task: taskqueue.NewTaskQueue(),
+		db:   db,
+	}
+}
+
+func (c *FetchTask) ProcessOne(param FetchParam, name string) {
+	var dbInfo SqliteInfo
+	dbInfo.Status = taskqueue.TaskStatusRunning
+	dbInfo.WebUrl = param.WebUrl
+	dbInfo.Name = name
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		s := Screenshot{
+			name:     name,
+			webUrl:   param.WebUrl,
+			diskPath: param.DiskPath,
+			timeout:  5 * time.Minute,
+		}
+		err := s.DoScreenshot()
+		dbInfo.ScreenshotError = err.Error()
+		wg.Done()
+	}()
+
+	go func() {
+		vs := VideoSaver{
+			webUrl:   param.WebUrl,
+			diskPath: param.DiskPath,
+			selector: ".dplayer",
+		}
+
+		err := vs.Run()
+		dbInfo.VideoSaverError = err.Error()
+		dbInfo.M3u8Url = vs.m3u8Url
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	if len(dbInfo.ScreenshotError) > 0 || len(dbInfo.VideoSaverError) > 0 {
+		dbInfo.Status = taskqueue.TaskStatusFail
+	} else {
+		dbInfo.Status = taskqueue.TaskStatusDone
+	}
+	c.db.Create(&dbInfo)
+}
+
+func (c *FetchTask) AddCrawlTask(param FetchParam) error {
+	os.MkdirAll(param.DiskPath, 0755)
+	u, err := url.Parse(param.WebUrl)
+	if err != nil {
+		log.Println("url.Parse fail", err, param.WebUrl)
+		return err
+	}
 	name := filepath.Base(u.Path)
+
 	c.Task.Add(name, func() int32 {
-		var wg sync.WaitGroup
-		wg.Add(2)
-
-		go func() {
-			DoScreenshot(ScreenshotParam{
-				name:     name,
-				webUrl:   param.webUrl,
-				diskPath: param.dataDisk,
-				timeout:  5 * time.Minute,
-			})
-			wg.Done()
-		}()
-
-		go func() {
-			CrawlVideo(CrawlVideoParam{
-				webUrl:   param.webUrl,
-				diskPath: param.dataDisk,
-			})
-			wg.Done()
-		}()
-
-		wg.Wait()
-
+		c.ProcessOne(param, name)
 		return 0
 	})
+	return nil
 }
