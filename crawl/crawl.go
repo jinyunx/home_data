@@ -47,8 +47,13 @@ func NewCrawlTask() *FetchTask {
 		db:   db,
 	}
 }
+func (c *FetchTask) WaitToStop() {
+	c.Task.WaitToStop()
+}
 
 func (c *FetchTask) ProcessOne(param FetchParam, name string) {
+	log.Println("ProcessOne running")
+
 	var dbInfo SqliteInfo
 	dbInfo.Status = taskqueue.TaskStatusRunning
 	dbInfo.WebUrl = param.WebUrl

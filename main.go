@@ -8,4 +8,5 @@ func main() {
 		WebUrl:   "https://hy85z2.xxousm.com/archives/106318/",
 		DiskPath: "./data/",
 	})
+	task.WaitToStop()
 }

@@ -29,10 +29,12 @@ type TaskQueue struct {
 }
 
 func NewTaskQueue() *TaskQueue {
-	return &TaskQueue{
+	t := TaskQueue{
 		Tasks: make(chan *Task, 1000),
 		Peek:  make(map[string]*Task),
 	}
+	t.Start()
+	return &t
 }
 
 func (q *TaskQueue) Add(id string, exec func() int32) int32 {
@@ -88,7 +90,7 @@ func (q *TaskQueue) Start() {
 	}()
 }
 
-func (q *TaskQueue) Stop() {
+func (q *TaskQueue) WaitToStop() {
 	q.wg.Wait()
 	close(q.Tasks)
 }
