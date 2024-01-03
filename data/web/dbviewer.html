@@ -1,10 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction:column
+        }
+    </style>
     <title>SQLite Data</title>
 </head>
 <body>
-<table>
+<table border="1" cellspacing="0">
     <tr>
         <th>ID</th>
         <th>CreatedAt</th>
@@ -19,12 +28,12 @@
     {{range .Entries}}
     <tr>
         <td>{{.ID}}</td>
-        <td>{{.CreatedAt}}</td>
-        <td>{{.UpdatedAt}}</td>
+        <td>{{.CreatedAt.Format "2006-01-02 15:04:05"}}</td>
+        <td>{{.UpdatedAt.Format "2006-01-02 15:04:05"}}</td>
         <td>{{.Name}}</td>
         <td>{{.Status}}</td>
-        <td>{{.WebUrl}}</td>
-        <td>{{.M3u8Url}}</td>
+        <td><a href={{.WebUrl}}>WebUrl</a></td>
+        <td><a href={{.M3u8Url}}>M3u8Url</a></td>
         <td>{{.ScreenshotError}}</td>
         <td>{{.VideoSaverError}}</td>
     </tr>
