@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SQLite Data</title>
+</head>
+<body>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>CreatedAt</th>
+        <th>UpdatedAt</th>
+        <th>Name</th>
+        <th>Status</th>
+        <th>WebUrl</th>
+        <th>M3u8Url</th>
+        <th>ScreenshotError</th>
+        <th>VideoSaverError</th>
+    </tr>
+    {{range .Entries}}
+    <tr>
+        <td>{{.ID}}</td>
+        <td>{{.CreatedAt}}</td>
+        <td>{{.UpdatedAt}}</td>
+        <td>{{.Name}}</td>
+        <td>{{.Status}}</td>
+        <td>{{.WebUrl}}</td>
+        <td>{{.M3u8Url}}</td>
+        <td>{{.ScreenshotError}}</td>
+        <td>{{.VideoSaverError}}</td>
+    </tr>
+    {{end}}
+</table>
+<a href="?page={{.PrevPage}}">Previous Page</a>
+<a href="?page={{.NextPage}}">Next Page</a>
+</body>
+</html>

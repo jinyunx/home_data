@@ -1,6 +1,7 @@
 package crawl
 
 import (
+	"github.com/jinyunx/home_data/database"
 	"github.com/jinyunx/home_data/taskqueue"
 	"github.com/jinzhu/gorm"
 	"log"
@@ -18,33 +19,15 @@ type FetchParam struct {
 	DiskPath string
 }
 
-type SqliteInfo struct {
-	gorm.Model
-	Name            string `gorm:"uniqueIndex"`
-	Status          int32
-	WebUrl          string
-	M3u8Url         string
-	ScreenshotError string
-	VideoSaverError string
-}
-
 type FetchTask struct {
 	Task *taskqueue.TaskQueue
 	db   *gorm.DB
 }
 
-func NewCrawlTask(diskPath string) *FetchTask {
+func NewCrawlTask(diskPath string, dbName string) *FetchTask {
 	os.MkdirAll(diskPath, os.ModePerm)
 
-	dbPath := filepath.Join(diskPath, "test.db")
-	db, err := gorm.Open("sqlite3", dbPath)
-	if err != nil {
-		panic(err)
-	}
-
-	// Migrate the schema
-	db.AutoMigrate(&SqliteInfo{})
-
+	db := database.GetDB(diskPath, dbName)
 	return &FetchTask{
 		Task: taskqueue.NewTaskQueue(),
 		db:   db,
@@ -57,7 +40,7 @@ func (c *FetchTask) WaitToStop() {
 func (c *FetchTask) ProcessOne(param FetchParam, name string) {
 	log.Println("ProcessOne running")
 
-	var dbInfo SqliteInfo
+	var dbInfo database.CrawlStatus
 	dbInfo.Status = taskqueue.TaskStatusRunning
 	dbInfo.WebUrl = param.WebUrl
 	dbInfo.Name = name
