@@ -33,6 +33,11 @@ func NewCrawlTask(diskPath string, dbName string) *FetchTask {
 		db:   db,
 	}
 }
+
+func (c *FetchTask) Wait() {
+	c.Task.Wait()
+}
+
 func (c *FetchTask) WaitToStop() {
 	c.Task.WaitToStop()
 }

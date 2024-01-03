@@ -90,6 +90,10 @@ func (q *TaskQueue) Start() {
 	}()
 }
 
+func (q *TaskQueue) Wait() {
+	q.wg.Wait()
+}
+
 func (q *TaskQueue) WaitToStop() {
 	q.wg.Wait()
 	close(q.Tasks)
