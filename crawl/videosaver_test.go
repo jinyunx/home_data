@@ -5,7 +5,7 @@ import (
 )
 
 var hlsURL string = ""
-var diskPath string = "../data/103942/video"
+var diskPath string = "../data/"
 var webUrl string = "https://hy7uz1.jrkrta.com/archives/103942/"
 
 // 测试函数
@@ -14,6 +14,7 @@ func TestHlsSave(t *testing.T) {
 		diskPath: diskPath,
 		m3u8Url:  hlsURL,
 		selector: ".dplayer",
+		name:     "103942",
 	}
 	if err := vs.SaveHls(); err != nil {
 		t.Fatal(err)
@@ -25,6 +26,7 @@ func TestGetM3u8Url(t *testing.T) {
 		webUrl:   webUrl,
 		diskPath: diskPath,
 		selector: ".dplayer",
+		name:     "103942",
 	}
 	err, m3u8Url := vs.GetM3u8Url()
 	if err != nil {
@@ -43,6 +45,7 @@ func TestCrawlVideo(t *testing.T) {
 		webUrl:   webUrl,
 		diskPath: diskPath,
 		selector: ".dplayer",
+		name:     "103942",
 	}
 	if err := vs.Run(); err != nil {
 		t.Fatal(err)

@@ -33,8 +33,11 @@ type FetchTask struct {
 	db   *gorm.DB
 }
 
-func NewCrawlTask() *FetchTask {
-	db, err := gorm.Open("sqlite3", "./data/test.db")
+func NewCrawlTask(diskPath string) *FetchTask {
+	os.MkdirAll(diskPath, os.ModePerm)
+
+	dbPath := filepath.Join(diskPath, "test.db")
+	db, err := gorm.Open("sqlite3", dbPath)
 	if err != nil {
 		panic(err)
 	}
@@ -70,19 +73,24 @@ func (c *FetchTask) ProcessOne(param FetchParam, name string) {
 			timeout:  5 * time.Minute,
 		}
 		err := s.DoScreenshot()
-		dbInfo.ScreenshotError = err.Error()
+		if err != nil {
+			dbInfo.ScreenshotError = err.Error()
+		}
 		wg.Done()
 	}()
 
 	go func() {
 		vs := VideoSaver{
+			name:     name,
 			webUrl:   param.WebUrl,
 			diskPath: param.DiskPath,
 			selector: ".dplayer",
 		}
 
 		err := vs.Run()
-		dbInfo.VideoSaverError = err.Error()
+		if err != nil {
+			dbInfo.VideoSaverError = err.Error()
+		}
 		dbInfo.M3u8Url = vs.m3u8Url
 		wg.Done()
 	}()
@@ -98,7 +106,7 @@ func (c *FetchTask) ProcessOne(param FetchParam, name string) {
 }
 
 func (c *FetchTask) AddCrawlTask(param FetchParam) error {
-	os.MkdirAll(param.DiskPath, 0755)
+	os.MkdirAll(param.DiskPath, os.ModePerm)
 	u, err := url.Parse(param.WebUrl)
 	if err != nil {
 		log.Println("url.Parse fail", err, param.WebUrl)

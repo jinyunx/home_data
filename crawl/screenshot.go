@@ -6,6 +6,7 @@ import (
 	"github.com/chromedp/chromedp/device"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -17,10 +18,14 @@ type Screenshot struct {
 }
 
 func (s *Screenshot) DoScreenshot() error {
+	log.Println("DoScreenshot running")
+	filePath := filepath.Join(s.diskPath, s.name)
+	os.MkdirAll(filePath, os.ModePerm)
+
 	// create context
 	ctx, cancel := chromedp.NewContext(
 		context.Background(),
-		chromedp.WithDebugf(log.Printf),
+		//chromedp.WithDebugf(log.Printf),
 	)
 	defer cancel()
 
@@ -39,7 +44,7 @@ func (s *Screenshot) DoScreenshot() error {
 		return err
 	}
 
-	imgPath := s.diskPath + s.name + ".png"
+	imgPath := filepath.Join(filePath, s.name+".png")
 	if err := os.WriteFile(imgPath, buf, 0o644); err != nil {
 		log.Println("os.WriteFile fail", err, imgPath)
 		return err

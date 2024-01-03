@@ -8,8 +8,8 @@ import (
 
 // 测试函数
 func TestScreenshot(t *testing.T) {
-	diskPath := "../data/103942/"
-	os.MkdirAll(diskPath, 0755)
+	diskPath := "../data/"
+	os.MkdirAll(diskPath, os.ModePerm)
 	s := Screenshot{
 		name:     "103942",
 		webUrl:   "",

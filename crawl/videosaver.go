@@ -17,6 +17,7 @@ import (
 type VideoSaver struct {
 	webUrl   string
 	diskPath string
+	name     string
 	selector string
 
 	m3u8Url string
@@ -27,6 +28,8 @@ func (vs *VideoSaver) M3u8Url() string {
 }
 
 func (vs *VideoSaver) Run() error {
+	log.Println("VideoSaver running")
+
 	err, m3u8Url := vs.GetM3u8Url()
 	if err != nil {
 		return err
@@ -48,6 +51,8 @@ type DataConfig struct {
 }
 
 func (vs *VideoSaver) GetM3u8Url() (error, string) {
+	log.Println("GetM3u8Url running")
+
 	doc, err := goquery.NewDocument(vs.webUrl)
 	if err != nil {
 		log.Println("goquery.NewDocument fail", err)
@@ -82,6 +87,11 @@ func (vs *VideoSaver) GetM3u8Url() (error, string) {
 }
 
 func (vs *VideoSaver) SaveHls() error {
+	log.Println("SaveHls running")
+
+	filePath := filepath.Join(vs.diskPath, vs.name, "video")
+	os.MkdirAll(filePath, os.ModePerm)
+
 	resp, err := http.Get(vs.m3u8Url)
 	if err != nil {
 		log.Println("http.Get fail", err, vs.m3u8Url)
@@ -99,8 +109,6 @@ func (vs *VideoSaver) SaveHls() error {
 	if !ok {
 		return errors.New("Invalid playlist")
 	}
-
-	os.MkdirAll(vs.diskPath, os.ModePerm)
 
 	localPlaylist, err := m3u8.NewMediaPlaylist(uint(playlist.Count()), uint(playlist.Count()))
 	if err != nil {
@@ -123,7 +131,7 @@ func (vs *VideoSaver) SaveHls() error {
 		}
 
 		keyName := filepath.Base(u.Path)
-		keyFilePath := filepath.Join(vs.diskPath, keyName)
+		keyFilePath := filepath.Join(filePath, keyName)
 		out, err := os.Create(keyFilePath)
 		if err != nil {
 			log.Println("os.Create fail", err, keyFilePath)
@@ -157,7 +165,7 @@ func (vs *VideoSaver) SaveHls() error {
 			}
 
 			tsName := filepath.Base(u.Path)
-			tsFilePath := filepath.Join(vs.diskPath, tsName)
+			tsFilePath := filepath.Join(filePath, tsName)
 			out, err := os.Create(tsFilePath)
 			if err != nil {
 				log.Println("os.Create fail", err, tsFilePath)
@@ -176,8 +184,8 @@ func (vs *VideoSaver) SaveHls() error {
 	}
 
 	buf := localPlaylist.Encode()
-	if err := os.WriteFile(filepath.Join(vs.diskPath, "index.m3u8"), buf.Bytes(), 0o644); err != nil {
-		log.Println("os.WriteFile fail", err, vs.diskPath)
+	if err := os.WriteFile(filepath.Join(filePath, "index.m3u8"), buf.Bytes(), 0o644); err != nil {
+		log.Println("os.WriteFile fail", err, filePath)
 		return err
 	}
 	return nil
