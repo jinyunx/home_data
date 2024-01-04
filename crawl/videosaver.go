@@ -92,6 +92,12 @@ func (vs *VideoSaver) SaveHls() error {
 	filePath := filepath.Join(vs.diskPath, vs.name, "video")
 	os.MkdirAll(filePath, os.ModePerm)
 
+	m3u8Path := filepath.Join(filePath, "index.m3u8")
+	if _, err := os.Stat(m3u8Path); err == nil {
+		log.Println(m3u8Path, "exists")
+		return nil
+	}
+
 	resp, err := http.Get(vs.m3u8Url)
 	if err != nil {
 		log.Println("http.Get fail", err, vs.m3u8Url)
@@ -184,7 +190,7 @@ func (vs *VideoSaver) SaveHls() error {
 	}
 
 	buf := localPlaylist.Encode()
-	if err := os.WriteFile(filepath.Join(filePath, "index.m3u8"), buf.Bytes(), 0o644); err != nil {
+	if err := os.WriteFile(m3u8Path, buf.Bytes(), 0o644); err != nil {
 		log.Println("os.WriteFile fail", err, filePath)
 		return err
 	}

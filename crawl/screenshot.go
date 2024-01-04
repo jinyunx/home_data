@@ -22,6 +22,12 @@ func (s *Screenshot) DoScreenshot() error {
 	filePath := filepath.Join(s.diskPath, s.name)
 	os.MkdirAll(filePath, os.ModePerm)
 
+	imgPath := filepath.Join(filePath, s.name+".png")
+	if _, err := os.Stat(imgPath); err == nil {
+		log.Println(imgPath, "exists")
+		return nil
+	}
+
 	// create context
 	ctx, cancel := chromedp.NewContext(
 		context.Background(),
@@ -44,7 +50,6 @@ func (s *Screenshot) DoScreenshot() error {
 		return err
 	}
 
-	imgPath := filepath.Join(filePath, s.name+".png")
 	if err := os.WriteFile(imgPath, buf, 0o644); err != nil {
 		log.Println("os.WriteFile fail", err, imgPath)
 		return err
