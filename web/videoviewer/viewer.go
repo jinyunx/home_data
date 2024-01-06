@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -25,7 +27,20 @@ func View(diskPath string) {
 		name := filepath.Base(r.URL.Path)
 		_, err := strconv.Atoi(filepath.Base(r.URL.Path))
 		if err != nil {
-			http.FileServer(http.Dir(diskPath)).ServeHTTP(w, r)
+			if name == "index.m3u8" {
+				content, err := ioutil.ReadFile(filepath.Join(diskPath, r.URL.Path))
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				// 追加#EXT-X-ENDLIST，不然会识别为直播
+				fmt.Fprintln(w, string(content))
+				fmt.Fprintln(w, "#EXT-X-ENDLIST")
+				log.Println(name, "#EXT-X-ENDLIST")
+			} else {
+				http.FileServer(http.Dir(diskPath)).ServeHTTP(w, r)
+			}
 			return
 		} else {
 			log.Println("name", name)
