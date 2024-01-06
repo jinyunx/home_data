@@ -11,7 +11,7 @@ import (
 
 var diskPath = "data/"
 var dbName = "test.db"
-var host = "https://hy9wz1.pthjsv.com/"
+var host = "https://h2ajz1.xljyfu.com/"
 
 func main() {
 	pwd, err := os.Getwd()
