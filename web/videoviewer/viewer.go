@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 )
 
 type WebData struct {
@@ -27,8 +28,25 @@ type MenuData struct {
 	NextPage int
 }
 
+var dirCache []os.DirEntry
+
 func main() {
-	View("/Volumes/sata11-136XXXX0904/51cg/data")
+	dirPath := "/Volumes/sata11-136XXXX0904/51cg/data"
+	go UpdateDir(dirPath)
+	View(dirPath)
+}
+
+func UpdateDir(diskPath string) {
+	for true {
+		t := time.Now()
+		var err error
+		dirCache, err = os.ReadDir(diskPath)
+		if err != nil {
+			log.Println("os.ReadDir fail", diskPath)
+		}
+		log.Println("time cost", time.Since(t))
+		time.Sleep(time.Hour)
+	}
 }
 
 func View(diskPath string) {
@@ -61,24 +79,20 @@ func fetchMenu(diskPath string, w http.ResponseWriter, r *http.Request) {
 		page = 0
 	}
 
-	dirList, err := os.ReadDir(diskPath)
-	if err != nil {
-		log.Println("os.ReadDir fail", dirList)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	pageSize := 5
 	start := page * pageSize
 	end := start + pageSize
-	if start > len(dirList) {
-		log.Println("EOF", start, len(dirList))
+	if end >= len(dirCache) {
+		end = len(dirCache)
+	}
+	if start >= len(dirCache) {
+		log.Println("EOF", start, len(dirCache))
 		http.Error(w, "EOF", http.StatusInternalServerError)
 		return
 	}
 
 	var menuData MenuData
-	for _, e := range dirList[start:end] {
+	for _, e := range dirCache[start:end] {
 		menuData.Menu = append(menuData.Menu, Article{
 			DetailRef: e.Name(),
 			Img:       e.Name() + "/" + e.Name() + ".png",
