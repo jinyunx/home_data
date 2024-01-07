@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .sprite {
+      width: 800px;
+    }
+    .image1 {
+      height: 350px;
+      background-position: 0px -100px;
+      background-size: 100% auto;
+      margin: auto;
+      border-top:10px solid #f3e82b
+    }
+    .image2, .image3, .image4, .image5 {
+      height: 350px;
+      background-size: 100% auto;
+    }
+    .image2 {
+      background-position: 0 -450px;
+    }
+    .image3 {
+      background-position: 0 -800px;
+    }
+    .image4 {
+      background-position: 0 -1150px;
+    }
+    .image5 {
+      background-position: 0 -1500px;
+    }
+    .row {
+      width: 800px;
+      height: 350px;
+      display: flex;
+      justify-content: center;
+      margin: auto;
+    }
+    .page_jump {
+      display: flex;
+      justify-content: center;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+{{range .Menu}}
+<div class="article" style="cursor: pointer;" onclick="window.location='{{.DetailRef}}';">
+  <div class="sprite image1" style="background-image: url('{{.Img}}');"></div>
+  <div class="row">
+    <div class="sprite image2" style="background-image: url('{{.Img}}');"></div>
+    <div class="sprite image3" style="background-image: url('{{.Img}}');"></div>
+    <div class="sprite image4" style="background-image: url('{{.Img}}');"></div>
+    <div class="sprite image5" style="background-image: url('{{.Img}}');"></div>
+  </div>
+</div>
+{{end}}
+<div class="page_jump">
+<a href="?page={{.PrevPage}}">Previous Page</a>
+<a href="?page={{.NextPage}}">Next Page</a>
+</div>
+</body>
+</html>
