@@ -19,7 +19,7 @@ func (a *ArticleList) GetWebUrlList() (error, []string) {
 	}
 
 	var result []string
-	doc.Find("#index article a").Each(func(i int, s *goquery.Selection) {
+	doc.Find("#archive article a").Each(func(i int, s *goquery.Selection) {
 		href, exists := s.Attr("href")
 		if exists {
 			result = append(result, href)

@@ -53,8 +53,7 @@ func (c *FetchTask) ProcessOne(param FetchParam, name string) {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	//go func() {
-	func() {
+	go func() {
 		s := Screenshot{
 			name:     name,
 			webUrl:   param.WebUrl,
@@ -68,8 +67,7 @@ func (c *FetchTask) ProcessOne(param FetchParam, name string) {
 		wg.Done()
 	}()
 
-	//go func() {
-	func() {
+	go func() {
 		vs := VideoSaver{
 			name:     name,
 			webUrl:   param.WebUrl,

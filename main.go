@@ -11,7 +11,8 @@ import (
 
 var diskPath = "data/"
 var dbName = "test.db"
-var host = "https://h2avz1.ilfrjq.com/"
+var category = "https://h2bwz1.ivdemd.com/category/xsxy/"
+var host = "https://h2bwz1.ivdemd.com/"
 
 func main() {
 	pwd, err := os.Getwd()
@@ -26,8 +27,8 @@ func main() {
 
 	task := crawl.NewCrawlTask(diskPath, dbName)
 
-	for i := 47; i < 1000; i += 1 {
-		pageUrl, _ := url.JoinPath(host, "page/", strconv.Itoa(i))
+	for i := 1; i < 2; i += 1 {
+		pageUrl, _ := url.JoinPath(category, strconv.Itoa(i)+"/")
 		log.Println("pageUrl", pageUrl)
 		a := crawl.ArticleList{PageUrl: pageUrl}
 		err, pathList := a.GetWebUrlList()
