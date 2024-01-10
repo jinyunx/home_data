@@ -49,13 +49,17 @@ func UpdateDir(diskPath string) {
 	}
 }
 
+func isNumber(s string) bool {
+	_, err := strconv.ParseFloat(s, 64)
+	return err == nil
+}
+
 func View(diskPath string) {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Path", r.URL.Path)
 
 		name := filepath.Base(r.URL.Path)
-		_, err := strconv.Atoi(filepath.Base(r.URL.Path))
-		if err != nil {
+		if !isNumber(filepath.Base(r.URL.Path)) {
 			if name == "index.m3u8" {
 				fetchM3u8(diskPath, name, w, r)
 			} else if r.URL.Path == "/" {
@@ -93,9 +97,13 @@ func fetchMenu(diskPath string, w http.ResponseWriter, r *http.Request) {
 
 	var menuData MenuData
 	for _, e := range dirCache[start:end] {
+		if !isNumber(e.Name()) {
+			log.Println("!isNumber", e.Name())
+			continue
+		}
 		menuData.Menu = append(menuData.Menu, Article{
 			DetailRef: e.Name(),
-			Img:       e.Name() + "/" + e.Name() + ".png",
+			Img:       e.Name() + "/" + e.Name() + ".jpg",
 		})
 	}
 	menuData.NextPage = page + 1

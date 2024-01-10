@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    img {
+      width: 800px;
+      margin: auto;
+      border-top:10px solid #f3e82b
+    }
+    body {
+      display: grid;
+      align-items: center;
+      justify-items: center;
+      height: 100vh;
+    }
+    .page_jump {
+      display: flex;
+      justify-content: center;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+{{range .Menu}}
+<div class="article" style="cursor: pointer;" onclick="window.location='{{.DetailRef}}';">
+  <img src="{{.Img}}" alt="loading">
+</div>
+{{end}}
+<div class="page_jump">
+<a href="?page={{.PrevPage}}" style="font-size: 4rem">Previous Page</a>
+<a href="?page={{.NextPage}}" style="font-size: 4rem">Next Page</a>
+</div>
+</body>
+</html>
