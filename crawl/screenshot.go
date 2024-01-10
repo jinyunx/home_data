@@ -76,6 +76,7 @@ func getTasks(urlstr string, res *[]byte, dataConfig *string) chromedp.Tasks {
 	return chromedp.Tasks{
 		chromedp.Emulate(device.IPhone12Pro),
 		chromedp.Navigate(urlstr),
+		chromedp.Sleep(time.Second * 10),
 		//chromedp.Evaluate(`document.querySelector('div.dplayer').getAttribute('data-config')`, dataConfig),
 		chromedp.FullScreenshot(res, 90),
 	}
@@ -91,7 +92,7 @@ func spriteImg(r io.Reader, savePath string) {
 	// 获取图片的边界
 	bounds := img.Bounds()
 	width := bounds.Dx()
-	//height := bounds.Dy()
+	height := bounds.Dy()
 
 	titleWidth := width
 	titleHeigth := 425
@@ -111,6 +112,9 @@ func spriteImg(r io.Reader, savePath string) {
 		y0 := i*cutHeight + titleHeigth + titleStart
 		x1 := width
 		y1 := y0 + cutHeight
+		if y1 >= height {
+			break
+		}
 		rect := image.Rect(x0, y0, x1, y1)
 		subImg := img.(interface {
 			SubImage(r image.Rectangle) image.Image
