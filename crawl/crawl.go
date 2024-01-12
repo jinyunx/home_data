@@ -34,6 +34,10 @@ func NewCrawlTask(diskPath string, dbName string) *FetchTask {
 	}
 }
 
+func (c *FetchTask) PeekTask() []*taskqueue.Task {
+	return c.Task.PeekTask()
+}
+
 func (c *FetchTask) Wait() {
 	c.Task.Wait()
 }
