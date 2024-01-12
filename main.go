@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"sync"
+	"time"
 )
 
 var diskPath = "data/"
@@ -17,6 +18,7 @@ var dbName = "test.db"
 var muRunBatchTask sync.Mutex
 var pageUrl string
 var errMsg string
+var dirCnt int
 
 type SingleTask struct {
 	TaskUrl string
@@ -39,6 +41,7 @@ func main() {
 	diskPath = filepath.Join(pwd, diskPath)
 	task := crawl.NewCrawlTask(diskPath, dbName)
 	go HttpSvr(task)
+	go UpdateDir(diskPath)
 	select {}
 }
 
@@ -93,8 +96,23 @@ func HttpSvr(task *crawl.FetchTask) {
 	http.ListenAndServe(":9090", nil)
 }
 
+func UpdateDir(diskPath string) {
+	for true {
+		t := time.Now()
+		var err error
+		dirCache, err := os.ReadDir(diskPath)
+		if err != nil {
+			log.Println("os.ReadDir fail", diskPath)
+		}
+		log.Println("time cost", time.Since(t))
+		dirCnt = len(dirCache)
+		time.Sleep(time.Hour)
+	}
+}
+
 func GetConsoleContent(task *crawl.FetchTask) string {
-	content := "pageUrl\n" + pageUrl + "\n"
+	content := "dirCnt:" + strconv.Itoa(dirCnt) + "\n"
+	content += "pageUrl:" + pageUrl + "\n"
 	content += "======================\n\n"
 	content += "ID,\tStatus,\tTimeAdd\n"
 
