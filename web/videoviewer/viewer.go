@@ -31,7 +31,7 @@ type MenuData struct {
 var dirCache []os.DirEntry
 
 func main() {
-	dirPath := "/Volumes/sata11-136XXXX0904/51cg/data"
+	dirPath := "../data"
 	go UpdateDir(dirPath)
 	View(dirPath)
 }
