@@ -83,7 +83,7 @@ func fetchMenu(diskPath string, w http.ResponseWriter, r *http.Request) {
 		page = 0
 	}
 
-	pageSize := 5
+	pageSize := 10
 	start := page * pageSize
 	end := start + pageSize
 	if end >= len(dirCache) {

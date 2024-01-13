@@ -33,9 +33,18 @@ func (s *Screenshot) DoScreenshot() error {
 		return nil
 	}
 
+	opts := append(chromedp.DefaultExecAllocatorOptions[:])//chromedp.Flag("headless", false),
+	//chromedp.DisableGPU,
+	//chromedp.CombinedOutput(log.Writer()),
+	//chromedp.Flag("enable-logging", true),
+	//chromedp.Flag("v", "1"),
+
+	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+	defer cancel()
+
 	// create context
 	ctx, cancel := chromedp.NewContext(
-		context.Background(),
+		allocCtx,
 		//chromedp.WithDebugf(log.Printf),
 	)
 	defer cancel()
@@ -78,7 +87,8 @@ func getTasks(urlstr string, res *[]byte, dataConfig *string) chromedp.Tasks {
 		chromedp.Navigate(urlstr),
 		chromedp.Sleep(time.Second * 10),
 		//chromedp.Evaluate(`document.querySelector('div.dplayer').getAttribute('data-config')`, dataConfig),
-		chromedp.FullScreenshot(res, 90),
+		//chromedp.FullScreenshot(res, 90),
+		chromedp.Screenshot(".container", res, chromedp.NodeVisible),
 	}
 }
 
