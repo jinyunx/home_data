@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="/test/usr/plugins/tbxw/jquery.min.js" type="text/javascript"></script>
+  <script src="/test/usr/plugins/tbxw/zzz.js" type="text/javascript"></script>
+
+  <script>
+      $(function() {
+        // 获取包含图片的div元素
+        var divElement = document.getElementById('img_list_id'); // 请将'yourDivId'替换为你的div的ID
+        // 获取div中的所有img元素
+        var imgElements = divElement.getElementsByTagName('img');
+        // 遍历img元素并输出它们的src
+        for (var i = 0; i < imgElements.length; i++) {
+          console.log(imgElements[i].src);
+        }
+      })
+    var ab2b64 = function (t) {
+      return new Promise(function (e) {
+        const n = new Blob([t]);
+        const r = new FileReader();
+        r.onload = function (t) {
+          const n = t.target.result;
+          const r = n.substring(n.indexOf(",") + 1);
+          e(r);
+        };
+        r.readAsDataURL(n);
+      });
+    };
+    var loadImage = function (imgUrl , imgEleId){
+      console.log("loadImage")
+      var imgEle = document.getElementById(imgEleId);
+      if (imgUrl.indexOf("/new/") > 0 || imgUrl.indexOf("/xiao/") > 0) {
+        $.ajax(imgUrl, {
+          xhrFields: {responseType: 'arraybuffer'}
+        }).then((res) => {
+          console.log("then")
+          ab2b64(res).then((base64str) => {
+            let ary = imgEleId.split('.'),decryptStr = decryptImage(base64str);
+            imgEle.src = 'data:image/'+ary.pop()+';base64,'+decryptStr+'';
+          });
+        })
+      } else {
+        imgEle.src = '"' + imgUrl + '"';
+      }
+    }
+  </script>
+
+  <div class="img_list", id="img_list_id">
+  <img src="/test/usr/plugins/tbxw/zw.png" id="foot-menu-icon-0" data-xuid="1" data-xkrkllgl="https://pic.bjkkmya.cn/upload/xiao/20240110/2024011011580930711.jpeg" alt="21.jpg" title="21.jpg"><br>
+  <script type="text/javascript">
+    loadImage("https://pic.bjkkmya.cn/upload/xiao/20240110/2024011011580930711.jpeg", "foot-menu-icon-0");
+  </script>
+  <img src="/test/usr/plugins/tbxw/zw.png" data-xuid="2" data-xkrkllgl="https://pic.bjkkmya.cn/upload/xiao/20240110/2024011011581251751.jpeg" alt="23.jpg" title="23.jpg"><br>
+    <img src="/test/usr/plugins/tbxw/zw.png" data-xuid="3" data-xkrkllgl="https://pic.bjkkmya.cn/upload/xiao/20240110/2024011011581485949.jpeg" alt="24.jpg" title="24.jpg"><br>
+    <img src="/test/usr/plugins/tbxw/zw.png" data-xuid="4" data-xkrkllgl="https://pic.bjkkmya.cn/upload/xiao/20240110/2024011011581710478.jpeg" alt="26.jpg" title="26.jpg"><br>
+    <img src="/test/usr/plugins/tbxw/zw.png" data-xuid="5" data-xkrkllgl="https://pic.bjkkmya.cn/upload/xiao/20240110/2024011011581943974.jpeg" alt="31.jpg" title="31.jpg"><br>
+    <img src="/test/usr/plugins/tbxw/zw.png" data-xuid="6" data-xkrkllgl="https://pic.bjkkmya.cn/upload/xiao/20240110/2024011011582114171.jpeg" alt="32.jpg" title="32.jpg"><br>
+    <img src="/test/usr/plugins/tbxw/zw.png" data-xuid="7" data-xkrkllgl="https://pic.bjkkmya.cn/upload/xiao/20240110/2024011011582264256.jpeg" alt="34.jpg" title="34.jpg">
+  </div>
+
+  </head>
+<body>
+
+</body>
+</html>

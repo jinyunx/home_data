@@ -9,4 +9,5 @@ require (
 	github.com/grafov/m3u8 v0.12.0
 	github.com/jinzhu/gorm v1.9.16
 	github.com/mattn/go-sqlite3 v1.14.19
+	github.com/robertkrimen/otto v0.3.0
 )
