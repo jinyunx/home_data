@@ -1,0 +1,1 @@
+sudo mount -t cifs //192.168.3.26/sata11-xxxXXXXxxxx/51cg /mnt/my_nas -o username=xxx,password=xxx

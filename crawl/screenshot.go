@@ -28,12 +28,14 @@ func (s *Screenshot) DoScreenshot() error {
 	os.MkdirAll(filePath, os.ModePerm)
 
 	imgPath := filepath.Join(filePath, s.name+".png")
-	if _, err := os.Stat(imgPath); err == nil {
-		log.Println(imgPath, "exists")
+	spriteImgPath := filepath.Join(filePath, s.name+".jpg")
+
+	if _, err := os.Stat(spriteImgPath); err == nil {
+		log.Println(spriteImgPath, "exists")
 		return nil
 	}
 
-	opts := append(chromedp.DefaultExecAllocatorOptions[:])//chromedp.Flag("headless", false),
+	opts := append(chromedp.DefaultExecAllocatorOptions[:]) //chromedp.Flag("headless", false),
 	//chromedp.DisableGPU,
 	//chromedp.CombinedOutput(log.Writer()),
 	//chromedp.Flag("enable-logging", true),
@@ -71,7 +73,6 @@ func (s *Screenshot) DoScreenshot() error {
 	log.Println("img path:", imgPath)
 	log.Println("data-config:", dataConfig)
 
-	spriteImgPath := filepath.Join(filePath, s.name+".jpg")
 	spriteImg(bytes.NewReader(buf), spriteImgPath)
 	log.Println("sprite img path:", spriteImgPath)
 	return nil

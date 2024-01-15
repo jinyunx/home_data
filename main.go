@@ -19,6 +19,8 @@ var muRunBatchTask sync.Mutex
 var pageUrl string
 var errMsg string
 var dirCnt int
+var noImgCnt int
+var noVideoCnt int
 
 type SingleTask struct {
 	TaskUrl string
@@ -96,6 +98,11 @@ func HttpSvr(task *crawl.FetchTask) {
 	http.ListenAndServe(":9090", nil)
 }
 
+func isNumber(s string) bool {
+	_, err := strconv.ParseFloat(s, 64)
+	return err == nil
+}
+
 func UpdateDir(diskPath string) {
 	for true {
 		t := time.Now()
@@ -106,6 +113,20 @@ func UpdateDir(diskPath string) {
 		}
 		log.Println("time cost", time.Since(t))
 		dirCnt = len(dirCache)
+		for _, d := range dirCache {
+			if isNumber(d.Name()) == false {
+				continue
+			}
+			img := filepath.Join(diskPath, d.Name(), d.Name()+".jpg")
+			if _, err := os.Stat(img); err == nil {
+				noImgCnt++
+			}
+
+			video := filepath.Join(diskPath, d.Name(), "video/index.m3u8")
+			if _, err := os.Stat(video); err == nil {
+				noVideoCnt++
+			}
+		}
 		time.Sleep(time.Hour)
 	}
 }

@@ -90,7 +90,11 @@ func (vs *VideoSaver) SaveHls() error {
 	log.Println("SaveHls running")
 
 	filePath := filepath.Join(vs.diskPath, vs.name, "video")
-	os.MkdirAll(filePath, os.ModePerm)
+	err := os.MkdirAll(filePath, os.ModePerm)
+	if err != nil {
+		log.Println("os.MkdirAll fail", err, filePath)
+		return err
+	}
 
 	m3u8Path := filepath.Join(filePath, "index.m3u8")
 	if _, err := os.Stat(m3u8Path); err == nil {

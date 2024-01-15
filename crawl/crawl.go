@@ -3,15 +3,12 @@ package crawl
 import (
 	"github.com/jinyunx/home_data/database"
 	"github.com/jinyunx/home_data/taskqueue"
-	"github.com/jinzhu/gorm"
 	"log"
 	"net/url"
 	"os"
 	"path/filepath"
 	"sync"
-	"time"
-
-	_ "github.com/mattn/go-sqlite3"
+	//_ "github.com/mattn/go-sqlite3"
 )
 
 type FetchParam struct {
@@ -21,16 +18,16 @@ type FetchParam struct {
 
 type FetchTask struct {
 	Task *taskqueue.TaskQueue
-	db   *gorm.DB
+	//db   *gorm.DB
 }
 
 func NewCrawlTask(diskPath string, dbName string) *FetchTask {
 	os.MkdirAll(diskPath, os.ModePerm)
 
-	db := database.GetDB(diskPath, dbName)
+	//db := database.GetDB(diskPath, dbName)
 	return &FetchTask{
 		Task: taskqueue.NewTaskQueue(),
-		db:   db,
+		//db:   db,
 	}
 }
 
@@ -55,21 +52,21 @@ func (c *FetchTask) ProcessOne(param FetchParam, name string) {
 	dbInfo.Name = name
 
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(1)
 
-	go func() {
-		s := Screenshot{
-			name:     name,
-			webUrl:   param.WebUrl,
-			diskPath: param.DiskPath,
-			timeout:  5 * time.Minute,
-		}
-		err := s.DoScreenshot()
-		if err != nil {
-			dbInfo.ScreenshotError = err.Error()
-		}
-		wg.Done()
-	}()
+	//go func() {
+	//	s := Screenshot{
+	//		name:     name,
+	//		webUrl:   param.WebUrl,
+	//		diskPath: param.DiskPath,
+	//		timeout:  5 * time.Minute,
+	//	}
+	//	err := s.DoScreenshot()
+	//	if err != nil {
+	//		dbInfo.ScreenshotError = err.Error()
+	//	}
+	//	wg.Done()
+	//}()
 
 	go func() {
 		vs := VideoSaver{
@@ -94,7 +91,7 @@ func (c *FetchTask) ProcessOne(param FetchParam, name string) {
 	} else {
 		dbInfo.Status = taskqueue.TaskStatusDone
 	}
-	c.db.Create(&dbInfo)
+	//c.db.Create(&dbInfo)
 }
 
 func (c *FetchTask) AddCrawlTask(param FetchParam) error {
