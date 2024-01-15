@@ -113,17 +113,19 @@ func UpdateDir(diskPath string) {
 		}
 		log.Println("time cost", time.Since(t))
 		dirCnt = len(dirCache)
+		noImgCnt = 0
+		noVideoCnt = 0
 		for _, d := range dirCache {
 			if isNumber(d.Name()) == false {
 				continue
 			}
 			img := filepath.Join(diskPath, d.Name(), d.Name()+".jpg")
-			if _, err := os.Stat(img); err == nil {
+			if _, err := os.Stat(img); err != nil {
 				noImgCnt++
 			}
 
 			video := filepath.Join(diskPath, d.Name(), "video/index.m3u8")
-			if _, err := os.Stat(video); err == nil {
+			if _, err := os.Stat(video); err != nil {
 				noVideoCnt++
 			}
 		}
@@ -133,6 +135,8 @@ func UpdateDir(diskPath string) {
 
 func GetConsoleContent(task *crawl.FetchTask) string {
 	content := "dirCnt:" + strconv.Itoa(dirCnt) + "\n"
+	content += "noImgCnt:" + strconv.Itoa(noImgCnt) + "\n"
+	content += "noVideoCnt:" + strconv.Itoa(noVideoCnt) + "\n"
 	content += "pageUrl:" + pageUrl + "\n"
 	content += "======================\n\n"
 	content += "ID,\tStatus,\tTimeAdd\n"
