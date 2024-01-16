@@ -1,0 +1,6 @@
+1.crawl usr/plugins/tbxw/zzz.js
+2.js format
+3.copy decryptImage
+4.install nodejs
+5.npm install crypto-js
+6.copy node_modules/crypto-js/crypto-js.js
