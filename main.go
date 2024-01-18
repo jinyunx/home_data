@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var diskPath = "data/"
+var diskPath = "../../data/"
 var dbName = "test.db"
 var muRunBatchTask sync.Mutex
 var pageUrl string

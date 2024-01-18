@@ -52,21 +52,20 @@ func (c *FetchTask) ProcessOne(param FetchParam, name string) {
 	dbInfo.Name = name
 
 	var wg sync.WaitGroup
-	wg.Add(1)
+	wg.Add(2)
 
-	//go func() {
-	//	s := Screenshot{
-	//		name:     name,
-	//		webUrl:   param.WebUrl,
-	//		diskPath: param.DiskPath,
-	//		timeout:  5 * time.Minute,
-	//	}
-	//	err := s.DoScreenshot()
-	//	if err != nil {
-	//		dbInfo.ScreenshotError = err.Error()
-	//	}
-	//	wg.Done()
-	//}()
+	go func() {
+		s := ImageSaver{
+			name:     name,
+			webUrl:   param.WebUrl,
+			diskPath: param.DiskPath,
+		}
+		err := s.SaveImg()
+		if err != nil {
+			dbInfo.ScreenshotError = err.Error()
+		}
+		wg.Done()
+	}()
 
 	go func() {
 		vs := VideoSaver{
