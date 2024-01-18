@@ -2,6 +2,7 @@ package crawl
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/disintegration/imaging"
@@ -13,12 +14,17 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type ImageSaver struct {
 	name     string
 	webUrl   string
 	diskPath string
+}
+
+type TxtContent struct {
+	Title string `json:"title"`
 }
 
 func (s *ImageSaver) GetImgUrlList() (error, []string) {
@@ -84,7 +90,44 @@ func (s *ImageSaver) SaveImg() error {
 	//for i, img := range imgs {
 	//	os.WriteFile(strconv.Itoa(i)+".jpg", img, os.ModePerm)
 	//}
-	s.MergeImg(imgs)
+	err = s.MergeImg(imgs)
+	if err != nil {
+		log.Println("MergeImg fail", err)
+		return err
+	}
+
+	err = s.SaveTxt()
+	if err != nil {
+		log.Println("SaveTxt fail", err)
+		return err
+	}
+	return nil
+}
+
+func (s *ImageSaver) SaveTxt() error {
+	doc, err := goquery.NewDocument(s.webUrl) // 替换为你想要抓取的网页URL
+	if err != nil {
+		log.Println("NewDocument fail", err)
+		return err
+	}
+
+	title := ""
+	doc.Find(".post-title").Each(func(i int, s *goquery.Selection) {
+		// 对于每一个匹配到的元素，获取它的文本内容
+		title = s.Text()
+		title = strings.Replace(title, " ", ",", -1)
+	})
+	content := TxtContent{Title: title}
+	str, err := json.Marshal(content)
+	if err != nil {
+		log.Println("json.Marshal fail", err)
+		return err
+	}
+	err = os.WriteFile(s.GetTxtPath(), str, os.ModePerm)
+	if err != nil {
+		log.Println("json.Marshal fail", err)
+		return err
+	}
 	return nil
 }
 
@@ -110,6 +153,12 @@ func (s *ImageSaver) GetJpgPath() string {
 	filePath := filepath.Join(s.diskPath, s.name)
 
 	return filepath.Join(filePath, s.name+".jpg")
+}
+
+func (s *ImageSaver) GetTxtPath() string {
+	filePath := filepath.Join(s.diskPath, s.name)
+
+	return filepath.Join(filePath, s.name+".json")
 }
 
 func (s *ImageSaver) MergeImg(imgs [][]byte) error {
