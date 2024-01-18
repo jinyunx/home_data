@@ -12,13 +12,19 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
+	"path/filepath"
 )
 
-func GetImgUrlList(detailUrl string) (error, []string) {
+type ImageSaver struct {
+	name     string
+	webUrl   string
+	diskPath string
+}
+
+func (s *ImageSaver) GetImgUrlList() (error, []string) {
 	log.Println("GetImgUrlList running")
 
-	doc, err := goquery.NewDocument(detailUrl)
+	doc, err := goquery.NewDocument(s.webUrl)
 	if err != nil {
 		log.Println("goquery.NewDocument fail", err)
 		return err, nil
@@ -37,7 +43,7 @@ func GetImgUrlList(detailUrl string) (error, []string) {
 	return nil, result
 }
 
-func DecryptImages(imgUrls []string) (error, [][]byte) {
+func (s *ImageSaver) DecryptImages(imgUrls []string) (error, [][]byte) {
 	log.Println("DecryptImages running")
 	var result [][]byte
 	for _, u := range imgUrls {
@@ -59,26 +65,54 @@ func DecryptImages(imgUrls []string) (error, [][]byte) {
 	return nil, result
 }
 
-func SaveImg(detailUrl string) error {
+func (s *ImageSaver) SaveImg() error {
 	log.Println("SaveImg running")
-	err, imgUrls := GetImgUrlList(detailUrl)
+	if s.IsDone() {
+		return nil
+	}
+
+	err, imgUrls := s.GetImgUrlList()
 	if err != nil {
 		log.Println("GetImgUrlList fail", err)
 		return err
 	}
-	err, imgs := DecryptImages(imgUrls)
+	err, imgs := s.DecryptImages(imgUrls)
 	if err != nil {
 		log.Println("DecryptImages fail", err)
 		return err
 	}
-	for i, img := range imgs {
-		os.WriteFile(strconv.Itoa(i)+".jpg", img, os.ModePerm)
-	}
-	MergeImg(imgs)
+	//for i, img := range imgs {
+	//	os.WriteFile(strconv.Itoa(i)+".jpg", img, os.ModePerm)
+	//}
+	s.MergeImg(imgs)
 	return nil
 }
 
-func MergeImg(imgs [][]byte) error {
+func (s *ImageSaver) IsDone() bool {
+	p := s.GetJpgPath()
+	if _, err := os.Stat(p); err == nil {
+		log.Println(p, "exists")
+		return true
+	}
+	filePath := filepath.Join(s.diskPath, s.name)
+	os.MkdirAll(filePath, os.ModePerm)
+
+	return false
+}
+
+func (s *ImageSaver) GetPngPath() string {
+	filePath := filepath.Join(s.diskPath, s.name)
+
+	return filepath.Join(filePath, s.name+".png")
+}
+
+func (s *ImageSaver) GetJpgPath() string {
+	filePath := filepath.Join(s.diskPath, s.name)
+
+	return filepath.Join(filePath, s.name+".jpg")
+}
+
+func (s *ImageSaver) MergeImg(imgs [][]byte) error {
 	var imgDecoded []image.Image
 	height := 0
 	width := 800
@@ -105,7 +139,7 @@ func MergeImg(imgs [][]byte) error {
 			y += img.Bounds().Dy()
 		}
 		// 创建新的图片文件
-		longFile, err := os.Create("longImg.jpg")
+		longFile, err := os.Create(s.GetPngPath())
 		if err != nil {
 			log.Println("os.Create fail", err)
 			return err
@@ -155,7 +189,7 @@ func MergeImg(imgs [][]byte) error {
 		}
 
 		// 创建新的图片文件
-		shortFile, err := os.Create("short.jpg")
+		shortFile, err := os.Create(s.GetJpgPath())
 		if err != nil {
 			log.Println("os.Create fail", err)
 			return err
