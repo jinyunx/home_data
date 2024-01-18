@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/jinyunx/home_data/crawl"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -20,6 +22,7 @@ type WebData struct {
 type Article struct {
 	DetailRef string
 	Img       string
+	Title     string
 }
 
 type MenuData struct {
@@ -31,7 +34,7 @@ type MenuData struct {
 var dirCache []os.DirEntry
 
 func main() {
-	dirPath := "../data"
+	dirPath := "../../data"
 	go UpdateDir(dirPath)
 	View(dirPath)
 }
@@ -77,6 +80,15 @@ func View(diskPath string) {
 	http.ListenAndServe(":8080", nil)
 }
 
+func getTitle(diskPath string, name string) string {
+	p := name + "/" + name + ".json"
+	file, _ := ioutil.ReadFile(filepath.Join(diskPath, p))
+
+	data := crawl.TxtContent{}
+	_ = json.Unmarshal([]byte(file), &data)
+	return data.Title
+}
+
 func fetchMenu(diskPath string, w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	if page < 0 {
@@ -104,6 +116,7 @@ func fetchMenu(diskPath string, w http.ResponseWriter, r *http.Request) {
 		menuData.Menu = append(menuData.Menu, Article{
 			DetailRef: e.Name(),
 			Img:       e.Name() + "/" + e.Name() + ".jpg",
+			Title:     getTitle(diskPath, e.Name()),
 		})
 	}
 	menuData.NextPage = page + 1
