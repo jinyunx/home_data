@@ -4,19 +4,14 @@ import (
 	b64 "encoding/base64"
 	"log"
 	"os/exec"
-	"path/filepath"
-	"runtime"
 )
 
 func DecryptImage(input []byte) ([]byte, error) {
 	sEnc := b64.StdEncoding.EncodeToString(input)
+	log.Println("imageBase64 len:", len(sEnc))
 
-	// 获取当前文件的路径
-	_, filename, _, _ := runtime.Caller(0)
-
-	// 获取当前文件的目录
-	dir := filepath.Dir(filename)
-	jsFile := filepath.Join(dir, "decrypt.js")
+	jsFile := "crawl/js/decrypt.js"
+	log.Println("jsFile:", jsFile)
 
 	// 调用 Node.js 执行 JavaScript 文件
 	cmd := exec.Command("node", jsFile, sEnc)

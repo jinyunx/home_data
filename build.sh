@@ -29,5 +29,5 @@ cp web/videoviewer/*.html release/pi/web/videoviewer
 mkdir -p release/pi/crawl/js
 cp crawl/js/*.js release/pi/crawl/js
 
-echo "sodu killall task && sodu nohup ./task &" > release/pi/run.sh
-echo "sodu killall videoviewer && sodu nohup ./videoviewer &" > release/pi/web/videoviewer/run.sh
+echo "sudo killall task; sudo nohup ./task &" > release/pi/run.sh
+echo "sudo killall videoviewer; sudo nohup ./videoviewer &" > release/pi/web/videoviewer/run.sh

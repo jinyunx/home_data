@@ -1,4 +1,4 @@
-const CryptoJS = require("./crypto-js.js");
+const CryptoJS = require("./crawl/js/crypto-js.js");
 
 function _0x442c(_0x1c5d27, _0x1eb2df) {
     const _0x2f5390 = _0x2f53();
