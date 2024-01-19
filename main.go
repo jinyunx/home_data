@@ -44,7 +44,7 @@ func main() {
 	diskPath = filepath.Join(pwd, diskPath)
 	task := crawl.NewCrawlTask(diskPath, dbName)
 	go HttpSvr(task)
-	go UpdateDir(diskPath)
+	go UpdateDir(diskPath, task)
 	select {}
 }
 
@@ -104,7 +104,7 @@ func isNumber(s string) bool {
 	return err == nil
 }
 
-func UpdateDir(diskPath string) {
+func UpdateDir(diskPath string, task *crawl.FetchTask) {
 	for true {
 		t := time.Now()
 		var err error
@@ -120,14 +120,23 @@ func UpdateDir(diskPath string) {
 			if isNumber(d.Name()) == false {
 				continue
 			}
+			needAddTask := false
 			img := filepath.Join(diskPath, d.Name(), d.Name()+".jpg")
 			if _, err := os.Stat(img); err != nil {
 				noImgCnt++
+				needAddTask = true
 			}
 
 			video := filepath.Join(diskPath, d.Name(), "video/index.m3u8")
 			if _, err := os.Stat(video); err != nil {
 				noVideoCnt++
+				needAddTask = true
+			}
+			if needAddTask {
+				s := SingleTask{
+					TaskUrl: "https://h2fvz2.ct6sc.com/archives/" + d.Name() + "/",
+				}
+				RunSingleTask(task, &s)
 			}
 		}
 		time.Sleep(time.Hour)

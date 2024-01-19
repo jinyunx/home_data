@@ -16,12 +16,18 @@
             width: 100%;
             max-width: 800px; /* 你可以根据需要调整这个值 */
         }
+        h1 {
+            text-align: center;
+            width: 800px;
+            word-wrap: break-word;
+        }
     </style>
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/dplayer/1.9.1/DPlayer.min.css">
 </head>
 <body>
 <div class="container">
     <div id="dplayer"></div>
+    <h1 class="post-title " itemprop="name headline">{{.Title}}</h1>
     <img src="{{.Img}}" alt="Your Image" loading="lazy">
 </div>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>

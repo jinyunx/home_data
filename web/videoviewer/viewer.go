@@ -15,8 +15,9 @@ import (
 )
 
 type WebData struct {
-	Img  string
-	M3u8 string
+	Img   string
+	M3u8  string
+	Title string
 }
 
 type Article struct {
@@ -34,7 +35,7 @@ type MenuData struct {
 var dirCache []os.DirEntry
 
 func main() {
-	dirPath := "../../data"
+	dirPath := "../../../../data"
 	go UpdateDir(dirPath)
 	View(dirPath)
 }
@@ -73,7 +74,7 @@ func View(diskPath string) {
 			return
 		} else {
 			log.Println("name", name)
-			fetchDetail(name, w, r)
+			fetchDetail(diskPath, name, w, r)
 		}
 	})
 
@@ -148,7 +149,7 @@ func fetchM3u8(diskPath string, name string, w http.ResponseWriter, r *http.Requ
 	log.Println(name, "#EXT-X-ENDLIST")
 }
 
-func fetchDetail(name string, w http.ResponseWriter, r *http.Request) {
+func fetchDetail(diskPath string, name string, w http.ResponseWriter, r *http.Request) {
 
 	dir, _ := os.Getwd()
 	log.Println("dir", dir)
@@ -161,8 +162,9 @@ func fetchDetail(name string, w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := WebData{
-		Img:  name + "/" + name + ".png",
-		M3u8: name + "/" + "video/index.m3u8",
+		Img:   name + "/" + name + ".png",
+		M3u8:  name + "/" + "video/index.m3u8",
+		Title: getTitle(diskPath, name),
 	}
 
 	if err := tmpl.Execute(w, data); err != nil {

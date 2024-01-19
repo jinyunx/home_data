@@ -221,7 +221,7 @@ func (s *ImageSaver) MergeImg(imgs [][]byte) error {
 				splitHeight2 = img.Bounds().Dy()
 			}
 		}
-		shortImg := imaging.New(width, splitHeight1+splitHeight1, image.Transparent)
+		shortImg := imaging.New(width, splitHeight1+splitHeight2, image.Transparent)
 		for i, img := range imgResize {
 			x := (i % imgCntOneLine) * (width / imgCntOneLine)
 			y := (i / imgCntOneLine) * splitHeight1
