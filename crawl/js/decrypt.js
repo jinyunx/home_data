@@ -1,4 +1,4 @@
-const CryptoJS = require("./crawl/js/crypto-js.js");
+const CryptoJS = require("./crypto-js.js");
 
 function _0x442c(_0x1c5d27, _0x1eb2df) {
     const _0x2f5390 = _0x2f53();
@@ -46,11 +46,42 @@ function _0x2f53() {
     return _0x2f53();
 };
 
-// 从命令行参数中获取输入
-const input = process.argv[2];
+const https = require("https")
 
-// 使用 CryptoJS 对输入进行加密
-const img = decryptImage(input);
+function getData(u) {
+    return new Promise((resolve, reject) => {
+        https.get(u, res => {
+            let data = [];
 
-// 将加密后的文本输出
-console.log(img);
+            // A chunk of data has been received.
+            res.on('data', chunk => {
+                data.push(chunk);
+            });
+
+            // The whole response has been received.
+            res.on('end', () => {
+                let buffer = Buffer.concat(data);
+                let base64Data = buffer.toString('base64');
+                resolve(base64Data);
+            });
+        }).on('error', error => {
+            reject(`Problem with request: ${error.message}`);
+        });
+    });
+}
+
+const url = process.argv[2]
+async function main() {
+    try {
+        let base64Data = await getData(url);
+        //console.log(base64Data);
+
+        const img = decryptImage(base64Data);
+        console.log(img);
+    } catch (error) {
+        console.error(error);
+        process.exit(1062)
+    }
+}
+
+main();

@@ -14,6 +14,7 @@ import (
 )
 
 var diskPath = "../../data/"
+var jsPath = "./crawl/js/"
 var dbName = "test.db"
 var muRunBatchTask sync.Mutex
 var pageUrl string
@@ -160,6 +161,7 @@ func RunSingleTask(task *crawl.FetchTask, s *SingleTask) {
 	task.AddCrawlTask(crawl.FetchParam{
 		WebUrl:   s.TaskUrl,
 		DiskPath: diskPath,
+		JsPath:   jsPath,
 	})
 }
 
@@ -180,6 +182,7 @@ func RunBatchTask(task *crawl.FetchTask, b *BatchTask) {
 			task.AddCrawlTask(crawl.FetchParam{
 				WebUrl:   webUrl,
 				DiskPath: diskPath,
+				JsPath:   jsPath,
 			})
 		}
 		task.Wait()

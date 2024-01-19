@@ -9,9 +9,7 @@ import (
 	"github.com/jinyunx/home_data/crawl/js"
 	"image"
 	"image/jpeg"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,6 +19,7 @@ type ImageSaver struct {
 	name     string
 	webUrl   string
 	diskPath string
+	jsPath   string
 }
 
 type TxtContent struct {
@@ -53,15 +52,7 @@ func (s *ImageSaver) DecryptImages(imgUrls []string) (error, [][]byte) {
 	log.Println("DecryptImages running")
 	var result [][]byte
 	for _, u := range imgUrls {
-		resp, err := http.Get(u)
-		if err != nil {
-			fmt.Println("http.Get fail", err)
-			return err, nil
-		}
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-
-		jpgBuf, err := js.DecryptImage(body)
+		jpgBuf, err := js.DecryptImageByUrl(u, s.jsPath)
 		if err != nil {
 			fmt.Println("js.DecryptImage fail", err)
 			return err, nil

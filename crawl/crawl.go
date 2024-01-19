@@ -14,6 +14,7 @@ import (
 type FetchParam struct {
 	WebUrl   string
 	DiskPath string
+	JsPath   string
 }
 
 type FetchTask struct {
@@ -59,6 +60,7 @@ func (c *FetchTask) ProcessOne(param FetchParam, name string) {
 			name:     name,
 			webUrl:   param.WebUrl,
 			diskPath: param.DiskPath,
+			jsPath:   param.JsPath,
 		}
 		err := s.SaveImg()
 		if err != nil {

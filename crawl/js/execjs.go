@@ -4,6 +4,7 @@ import (
 	b64 "encoding/base64"
 	"log"
 	"os/exec"
+	"path/filepath"
 )
 
 func DecryptImage(input []byte) ([]byte, error) {
@@ -15,6 +16,20 @@ func DecryptImage(input []byte) ([]byte, error) {
 
 	// 调用 Node.js 执行 JavaScript 文件
 	cmd := exec.Command("node", jsFile, sEnc)
+	output, err := cmd.Output()
+	if err != nil {
+		log.Println("Error:", err)
+		return nil, err
+	}
+	return b64.StdEncoding.DecodeString(string(output))
+}
+
+func DecryptImageByUrl(url string, jsPath string) ([]byte, error) {
+	jsFile := filepath.Join(jsPath, "./decrypt.js")
+	log.Println("jsFile:", jsFile)
+
+	// 调用 Node.js 执行 JavaScript 文件
+	cmd := exec.Command("node", jsFile, url)
 	output, err := cmd.Output()
 	if err != nil {
 		log.Println("Error:", err)

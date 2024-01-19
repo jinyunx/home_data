@@ -19,6 +19,7 @@ func TestSaveImg(t *testing.T) {
 		name:     "109915",
 		webUrl:   "https://h2enz2.ewkkgy.com/archives/109915/",
 		diskPath: "/Users/onexie/GoProjects/home_data/data",
+		jsPath:   "./js",
 	}
 	err := s.SaveImg()
 	if err != nil {

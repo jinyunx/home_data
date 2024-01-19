@@ -6,12 +6,7 @@ import (
 )
 
 func TestDecryptImage(t *testing.T) {
-	content, err := os.ReadFile("2024011011580930711.jpeg")
-	if err != nil {
-		t.Fatal("ioutil.ReadFile fail", err)
-		return
-	}
-	img, err := DecryptImage(content)
+	img, err := DecryptImageByUrl("https://pic.zhliua.cn/upload/xiao/20240104/2024010421202751563.jpeg", ".")
 	if err != nil {
 		t.Fatal("DecryptImage fail", err)
 		return
