@@ -35,13 +35,17 @@ func (s *ImageSaver) GetImgUrlList() (error, []string) {
 		return err, nil
 	}
 
+	maxImagCnt := 15
 	var result []string
 	// 查找所有有 data-xkrkllgl 属性的元素
 	doc.Find("[data-xkrkllgl]").Each(func(i int, s *goquery.Selection) {
 		// 获取 data-xkrkllgl 属性的值
 		href, exists := s.Attr("data-xkrkllgl")
 		if exists {
-			result = append(result, href)
+			// 图片太多内存吃不消
+			if len(result) < maxImagCnt {
+				result = append(result, href)
+			}
 			log.Println(href)
 		}
 	})
