@@ -23,6 +23,8 @@ var dirCnt int
 var noImgCnt int
 var noVideoCnt int
 
+var emptyName []string
+
 type SingleTask struct {
 	TaskUrl string
 }
@@ -55,10 +57,25 @@ func HttpSvr(task *crawl.FetchTask) {
 
 	http.HandleFunc("/single_task", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Path", r.URL.Path)
+
+		u, err := url.Parse(r.FormValue("TaskUrl"))
+		if err != nil {
+			log.Println("url.Parse fail", err, r.FormValue("TaskUrl"))
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		s := SingleTask{
 			TaskUrl: r.FormValue("TaskUrl"),
 		}
 		log.Println("SingleTask", s)
+
+		name := filepath.Base(u.Path)
+		if isNumber(name) == false {
+			RunEmptyNameTask(task, &s)
+			return
+		}
+
 		RunSingleTask(task, &s)
 	})
 
@@ -69,11 +86,13 @@ func HttpSvr(task *crawl.FetchTask) {
 		if err != nil {
 			log.Println("strconv.Atoi", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 		endPage, err := strconv.Atoi(r.FormValue("EndPage"))
 		if err != nil {
 			log.Println("strconv.Atoi", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		b := BatchTask{
@@ -87,11 +106,12 @@ func HttpSvr(task *crawl.FetchTask) {
 			go RunBatchTask(task, &b)
 		} else {
 			http.Error(w, "muRunBatchTask.TryLock fail", http.StatusInternalServerError)
+			return
 		}
 	})
 
 	http.HandleFunc("/get_console", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Path", r.URL.Path)
+		//log.Println("Path", r.URL.Path)
 		content := GetConsoleContent(task)
 		fmt.Fprintln(w, content)
 	})
@@ -133,10 +153,7 @@ func UpdateDir(diskPath string, task *crawl.FetchTask) {
 				needAddTask = true
 			}
 			if needAddTask {
-				s := SingleTask{
-					TaskUrl: "https://certain.zvwupfn.com/archives/" + d.Name() + "/",
-				}
-				RunSingleTask(task, &s)
+				emptyName = append(emptyName, d.Name())
 			}
 		}
 		time.Sleep(time.Hour)
@@ -172,6 +189,18 @@ func RunSingleTask(task *crawl.FetchTask, s *SingleTask) {
 		DiskPath: diskPath,
 		JsPath:   jsPath,
 	})
+}
+
+func RunEmptyNameTask(task *crawl.FetchTask, s *SingleTask) {
+	for _, name := range emptyName {
+		webUrl, _ := url.JoinPath(s.TaskUrl, name)
+		log.Println("webUrl", webUrl)
+		task.AddCrawlTask(crawl.FetchParam{
+			WebUrl:   webUrl,
+			DiskPath: diskPath,
+			JsPath:   jsPath,
+		})
+	}
 }
 
 func RunBatchTask(task *crawl.FetchTask, b *BatchTask) {
