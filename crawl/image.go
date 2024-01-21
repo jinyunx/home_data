@@ -3,7 +3,6 @@ package crawl
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/disintegration/imaging"
 	"github.com/jinyunx/home_data/crawl/js"
@@ -12,6 +11,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -35,7 +35,7 @@ func (s *ImageSaver) GetImgUrlList() (error, []string) {
 		return err, nil
 	}
 
-	maxImagCnt := 15
+	maxImagCnt := 10
 	var result []string
 	// 查找所有有 data-xkrkllgl 属性的元素
 	doc.Find("[data-xkrkllgl]").Each(func(i int, s *goquery.Selection) {
@@ -58,7 +58,7 @@ func (s *ImageSaver) DecryptImages(imgUrls []string) (error, [][]byte) {
 	for _, u := range imgUrls {
 		jpgBuf, err := js.DecryptImageByUrl(u, s.jsPath)
 		if err != nil {
-			fmt.Println("js.DecryptImage fail", err)
+			log.Println("js.DecryptImage fail", err)
 			return err, nil
 		}
 		result = append(result, jpgBuf)
@@ -156,7 +156,15 @@ func (s *ImageSaver) GetTxtPath() string {
 	return filepath.Join(filePath, s.name+".json")
 }
 
+func (s *ImageSaver) bToMb(b uint64) uint64 {
+	return b / 1024 / 1024
+}
+
 func (s *ImageSaver) MergeImg(imgs [][]byte) error {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	log.Printf("MergeImg start Alloc = %v MiB\n", s.bToMb(m.Alloc))
+
 	var imgDecoded []image.Image
 	height := 0
 	width := 800
@@ -169,6 +177,8 @@ func (s *ImageSaver) MergeImg(imgs [][]byte) error {
 		height += item.Bounds().Dy()
 		imgDecoded = append(imgDecoded, item)
 	}
+	runtime.ReadMemStats(&m)
+	log.Printf("imgDecoded done Alloc = %v MiB\n", s.bToMb(m.Alloc))
 
 	// 长图
 	if true {
@@ -182,6 +192,9 @@ func (s *ImageSaver) MergeImg(imgs [][]byte) error {
 			longImg = imaging.Paste(longImg, img, image.Pt(0, y))
 			y += img.Bounds().Dy()
 		}
+		runtime.ReadMemStats(&m)
+		log.Printf("longImg ready Alloc = %v MiB\n", s.bToMb(m.Alloc))
+
 		// 创建新的图片文件
 		longFile, err := os.Create(s.GetPngPath())
 		if err != nil {
@@ -194,6 +207,9 @@ func (s *ImageSaver) MergeImg(imgs [][]byte) error {
 		jpeg.Encode(longFile, longImg, &jpeg.Options{Quality: jpeg.DefaultQuality})
 
 	}
+
+	runtime.ReadMemStats(&m)
+	log.Printf("longImg done Alloc = %v MiB\n", s.bToMb(m.Alloc))
 
 	if true {
 		imgCnt := len(imgDecoded)
@@ -232,6 +248,9 @@ func (s *ImageSaver) MergeImg(imgs [][]byte) error {
 			shortImg = imaging.Paste(shortImg, img, image.Pt(x, y))
 		}
 
+		runtime.ReadMemStats(&m)
+		log.Printf("shortImg ready Alloc = %v MiB\n", s.bToMb(m.Alloc))
+
 		// 创建新的图片文件
 		shortFile, err := os.Create(s.GetJpgPath())
 		if err != nil {
@@ -244,5 +263,7 @@ func (s *ImageSaver) MergeImg(imgs [][]byte) error {
 		jpeg.Encode(shortFile, shortImg, &jpeg.Options{Quality: jpeg.DefaultQuality})
 
 	}
+	runtime.ReadMemStats(&m)
+	log.Printf("shortImg done Alloc = %v MiB\n", s.bToMb(m.Alloc))
 	return nil
 }

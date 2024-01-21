@@ -134,7 +134,7 @@ func UpdateDir(diskPath string, task *crawl.FetchTask) {
 			}
 			if needAddTask {
 				s := SingleTask{
-					TaskUrl: "https://h2fvz2.ct6sc.com/archives/" + d.Name() + "/",
+					TaskUrl: "https://certain.zvwupfn.com/archives/" + d.Name() + "/",
 				}
 				RunSingleTask(task, &s)
 			}
