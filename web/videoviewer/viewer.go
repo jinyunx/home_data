@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -32,12 +33,31 @@ type MenuData struct {
 	NextPage int
 }
 
-var dirCache []os.DirEntry
+var dirCache FileInfoSlice
 
 func main() {
 	dirPath := "../../../../data"
 	go UpdateDir(dirPath)
 	View(dirPath)
+}
+
+// FileInfoSlice 用于实现 sort.Interface 以便按修改时间排序
+type FileInfoSlice []os.DirEntry
+
+func (fis FileInfoSlice) Len() int {
+	return len(fis)
+}
+
+func (fis FileInfoSlice) Less(i, j int) bool {
+	// 使用 After 方法来判断时间的先后，这里我们按照时间逆序排序
+	infoi, _ := fis[i].Info()
+	infoj, _ := fis[j].Info()
+
+	return infoi.ModTime().After(infoj.ModTime())
+}
+
+func (fis FileInfoSlice) Swap(i, j int) {
+	fis[i], fis[j] = fis[j], fis[i]
 }
 
 func UpdateDir(diskPath string) {
@@ -48,8 +68,10 @@ func UpdateDir(diskPath string) {
 		if err != nil {
 			log.Println("os.ReadDir fail", diskPath)
 		}
+		// 按修改时间逆序排序
+		sort.Sort(dirCache)
 		log.Println("time cost", time.Since(t))
-		time.Sleep(time.Hour)
+		time.Sleep(time.Hour * 3)
 	}
 }
 

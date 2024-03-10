@@ -39,15 +39,25 @@ func (vs *VideoSaver) Run() error {
 	return vs.SaveHls()
 }
 
-type VideoElement struct {
-	Url        string `json:"url"`
-	Pic        string `json:"pic"`
-	Type       string `json:"type"`
-	Thumbnails string `json:"thumbnails"`
+type DataConfig struct {
+	Url string `json:"url"`
 }
 
-type DataConfig struct {
-	Video VideoElement `json:"video"`
+func HttpGet(url string) (resp *http.Response, err error) {
+	// 创建一个HTTP客户端
+	client := &http.Client{}
+
+	// 创建一个请求
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// 设置User-Agent头部，模拟Chrome浏览器
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+
+	// 发起请求
+	return client.Do(req)
 }
 
 func (vs *VideoSaver) GetM3u8Url() (error, string) {
@@ -73,7 +83,8 @@ func (vs *VideoSaver) GetM3u8Url() (error, string) {
 				findErr = err
 				return
 			}
-			m3u8Url = dataConfig.Video.Url
+			log.Println("dataConfig", dataConfig)
+			m3u8Url = dataConfig.Url
 		}
 	})
 	if findErr != nil {
@@ -102,7 +113,7 @@ func (vs *VideoSaver) SaveHls() error {
 		return nil
 	}
 
-	resp, err := http.Get(vs.m3u8Url)
+	resp, err := HttpGet(vs.m3u8Url)
 	if err != nil {
 		log.Println("http.Get fail", err, vs.m3u8Url)
 		return err
@@ -127,7 +138,7 @@ func (vs *VideoSaver) SaveHls() error {
 
 	key := playlist.Key
 	if key != nil {
-		resp, err := http.Get(key.URI)
+		resp, err := HttpGet(key.URI)
 		if err != nil {
 			log.Println("http.Get fail", err, key.URI)
 			return err
@@ -161,7 +172,7 @@ func (vs *VideoSaver) SaveHls() error {
 
 	for _, v := range playlist.Segments {
 		if v != nil {
-			resp, err := http.Get(v.URI)
+			resp, err := HttpGet(v.URI)
 			if err != nil {
 				log.Println("http.Get fail", err, v.URI)
 				return err

@@ -6,7 +6,7 @@ import (
 
 var hlsURL string = ""
 var diskPath string = "../data/"
-var webUrl string = "https://hy7uz1.jrkrta.com/archives/103942/"
+var webUrl string = "https://abandon.ucqhumktg.com/archives/123659/"
 
 // 测试函数
 func TestHlsSave(t *testing.T) {
@@ -45,7 +45,7 @@ func TestCrawlVideo(t *testing.T) {
 		webUrl:   webUrl,
 		diskPath: diskPath,
 		selector: ".dplayer",
-		name:     "103942",
+		name:     "123659",
 	}
 	if err := vs.Run(); err != nil {
 		t.Fatal(err)

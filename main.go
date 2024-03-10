@@ -156,7 +156,7 @@ func UpdateDir(diskPath string, task *crawl.FetchTask) {
 				emptyName = append(emptyName, d.Name())
 			}
 		}
-		time.Sleep(time.Hour)
+		time.Sleep(time.Hour * 24)
 	}
 }
 
